@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>くにもとMGポータルサイト</title>
+<style>
+  :root {
+    --green: #1a6fc4;
+    --green-dark: #0f4f9e;
+    --green-light: #e8f1fb;
+    --green-mid: #2d87d8;
+    --gray: #f5f5f5;
+    --border: #d0dff0;
+    --text: #333;
+    --text-sub: #666;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Hiragino Sans', 'Meiryo', sans-serif; color: var(--text); background: #fff; }
+
+  /* ── ナビ ── */
+  nav {
+    background: var(--green-dark);
+    color: #fff;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,.25);
+  }
+  .nav-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: flex; align-items: center; gap: 4px;
+    padding: 0 16px; flex-wrap: wrap;
+  }
+  .nav-logo { font-weight: 700; font-size: 15px; padding: 14px 12px 14px 0; white-space: nowrap; cursor: pointer; }
+  .nav-logo span { font-size: 11px; display: block; opacity: .75; }
+  .nav-links { display: flex; flex-wrap: wrap; gap: 0; }
+  .nav-links a {
+    color: #fff; text-decoration: none; font-size: 13px;
+    padding: 14px 11px; display: block; opacity: .85;
+    transition: background .15s, opacity .15s;
+    cursor: pointer;
+  }
+  .nav-links a:hover, .nav-links a.active { background: rgba(255,255,255,.15); opacity: 1; }
+
+  /* ── ページ表示制御 ── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── ヒーロー ── */
+  .hero {
+    background: linear-gradient(135deg, #0a3d7a 0%, #2d87d8 100%);
+    color: #fff; padding: 52px 24px 48px;
+    text-align: center;
+  }
+  .hero h1 { font-size: 32px; font-weight: 700; margin-bottom: 10px; letter-spacing: .02em; }
+  .hero p { font-size: 15px; opacity: .9; }
+
+  /* ── 検索バー ── */
+  .search-bar {
+    background: var(--green);
+    padding: 16px 24px;
+    display: flex; justify-content: center;
+  }
+  .search-bar input {
+    width: 100%; max-width: 560px;
+    padding: 10px 18px; border-radius: 24px; border: none;
+    font-size: 14px; outline: none;
+    box-shadow: 0 1px 6px rgba(0,0,0,.15);
+  }
+
+  /* ── セクション共通 ── */
+  .section { max-width: 1200px; margin: 0 auto; padding: 36px 24px; }
+  .section-title {
+    font-size: 18px; font-weight: 700; color: var(--green-dark);
+    margin-bottom: 20px; padding-bottom: 8px;
+    border-bottom: 2px solid var(--green);
+  }
+
+  /* ── クイックリンク（社内手続きMAP）── */
+  .quick-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+  }
+  .quick-btn {
+    background: var(--green);
+    color: #fff; border: none; border-radius: 8px;
+    padding: 16px 10px; text-align: center;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    transition: background .15s, transform .1s;
+    text-decoration: none; display: block;
+  }
+  .quick-btn:hover { background: var(--green-dark); transform: translateY(-2px); }
+  .quick-btn .icon { font-size: 22px; display: block; margin-bottom: 6px; }
+
+  /* ── 2カラム ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media(max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* ── お知らせリスト ── */
+  .news-list { list-style: none; }
+  .news-list li {
+    display: grid; grid-template-columns: 90px 60px 1fr;
+    gap: 8px; padding: 9px 0; border-bottom: 1px solid var(--border);
+    font-size: 13px; align-items: start;
+    cursor: pointer; transition: background .12s;
+    border-radius: 4px; padding-left: 4px;
+  }
+  .news-list li:hover { background: var(--green-light); }
+  .news-list .date { color: var(--text-sub); }
+  .badge {
+    font-size: 11px; font-weight: 600; padding: 2px 7px;
+    border-radius: 4px; background: var(--green-light);
+    color: var(--green-dark); white-space: nowrap; text-align: center;
+  }
+  .badge.blue { background: #e3f0fc; color: #1a5fa8; }
+  .badge.orange { background: #fff3e0; color: #b05a00; }
+
+  /* ── カード（部署別）── */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+  .card {
+    border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 14px; text-align: center; cursor: pointer;
+    transition: box-shadow .15s, transform .1s;
+  }
+  .card:hover { box-shadow: 0 4px 14px rgba(0,100,80,.15); transform: translateY(-2px); }
+  .card .icon { font-size: 26px; margin-bottom: 8px; }
+  .card .name { font-size: 13px; font-weight: 600; color: var(--green-dark); }
+  .card .sub { font-size: 11px; color: var(--text-sub); margin-top: 3px; }
+
+  /* ── ツールリンク ── */
+  .tool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+  .tool-btn {
+    display: flex; align-items: center; gap: 10px;
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 14px; font-size: 13px; font-weight: 600;
+    cursor: pointer; text-decoration: none; color: var(--text);
+    transition: background .15s;
+  }
+  .tool-btn:hover { background: var(--green-light); }
+  .tool-btn .icon { font-size: 20px; }
+
+  /* ── ページ本文 ── */
+  .page-hero {
+    background: linear-gradient(135deg, #0a3d7a, #2d87d8);
+    color: #fff; padding: 40px 24px; text-align: center;
+  }
+  .page-hero h1 { font-size: 26px; font-weight: 700; }
+  .page-hero p { margin-top: 8px; font-size: 14px; opacity: .9; }
+
+  /* ── コンテンツブロック ── */
+  .content-block { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 24px; margin-bottom: 20px; }
+  .content-block h2 { font-size: 16px; font-weight: 700; color: var(--green-dark); margin-bottom: 14px; }
+  .content-block p, .content-block li { font-size: 14px; line-height: 1.75; }
+  .content-block ul, .content-block ol { padding-left: 20px; }
+  .content-block li { margin-bottom: 4px; }
+
+  /* ── 申請フロー表 ── */
+  .flow-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .flow-table th { background: var(--green); color: #fff; padding: 9px 12px; text-align: left; }
+  .flow-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+  .flow-table tr:hover td { background: var(--green-light); }
+  .flow-table .cat { font-weight: 600; color: var(--green-dark); }
+
+  /* ── チェックリスト ── */
+  .checklist { list-style: none; }
+  .checklist li {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 7px 0; border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .checklist li::before { content: '☐'; font-size: 16px; color: var(--green); flex-shrink: 0; margin-top: 1px; }
+
+  /* ── FAQ ── */
+  .faq-item { border-bottom: 1px solid var(--border); }
+  .faq-q {
+    padding: 14px 0; font-weight: 600; font-size: 14px; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .faq-q::after { content: '▼'; font-size: 11px; color: var(--text-sub); transition: transform .2s; }
+  .faq-item.open .faq-q::after { transform: rotate(180deg); }
+  .faq-a { display: none; padding: 0 0 14px; font-size: 14px; line-height: 1.7; color: var(--text-sub); }
+  .faq-item.open .faq-a { display: block; }
+
+  /* ── フッター ── */
+  footer {
+    background: var(--green-dark); color: #fff;
+    text-align: center; padding: 20px;
+    font-size: 12px; margin-top: 40px; opacity: .9;
+  }
+
+  /* ── イベント欄 ── */
+  .event-list { list-style: none; }
+  .event-list li {
+    display: flex; gap: 14px; padding: 10px 4px; border-bottom: 1px solid var(--border);
+    font-size: 14px; cursor: pointer; transition: background .12s; border-radius: 4px;
+  }
+  .event-list li:hover { background: var(--green-light); }
+  .event-date { min-width: 80px; font-weight: 600; color: var(--green-dark); }
+</style>
+</head>
+<body>
+
+<!-- ナビ -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo" onclick="showPage('home')">
+      くにもとMGポータルサイト
+      <span>ここで生きる、をかなえる</span>
+    </div>
+    <div class="nav-links">
+      <a onclick="showPage('home')" id="nav-home" class="active">ホーム</a>
+      <a onclick="showPage('oshirase')" id="nav-oshirase">お知らせ</a>
+      <a onclick="showPage('tetsuzuki')" id="nav-tetsuzuki">社内手続き</a>
+      <a onclick="showPage('kitei')" id="nav-kitei">規程・マニュアル</a>
+      <a onclick="showPage('soshiki')" id="nav-soshiki">組織情報</a>
+      <a onclick="showPage('kenshu')" id="nav-kenshu">研修・教育</a>
+      <a onclick="showPage('onboarding')" id="nav-onboarding">新入職員ガイド</a>
+      <a onclick="showPage('tools')" id="nav-tools">業務ツール</a>
+      <a onclick="showPage('fukuri')" id="nav-fukuri">福利厚生</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════ ホーム ═══════════════════════════════ -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <h1>くにもとMGポータルサイト</h1>
+    <p>「ここで生きる、をかなえる」― グループの最新情報・申請・規程にすばやくアクセス</p>
+  </div>
+  <div class="search-bar">
+    <input type="text" placeholder="🔍　組織のコンテンツを検索">
+  </div>
+
+  <!-- 社内手続きMAP -->
+  <div class="section">
+    <div class="section-title">社内手続きMAP</div>
+    <div class="quick-grid">
+      <a class="quick-btn" href="https://workflow.layerx.jp/forms" target="_blank"><span class="icon">📋</span>バクラク申請</a>
+      <a class="quick-btn" href="https://workflow.layerx.jp/forms" target="_blank"><span class="icon">✈️</span>出張申請・精算</a>
+      <a class="quick-btn" href="https://workflow.layerx.jp/forms" target="_blank"><span class="icon">🗓️</span>休暇・勤怠申請</a>
+      <a class="quick-btn" href="https://docs.google.com/spreadsheets/d/1EO-krX-JsmXw2F86XFyAxmRJT70pwCvV/edit" target="_blank"><span class="icon">📞</span>内線番号表</a>
+      <a class="quick-btn" onclick="showPage('tetsuzuki')"><span class="icon">🖥️</span>IT問い合わせ</a>
+      <a class="quick-btn" onclick="showPage('kitei')"><span class="icon">📖</span>規程集</a>
+      <a class="quick-btn" href="https://drive.google.com/file/d/157FDzxPBbDTaBs0gwC1G8XEsvM1PCMGr/view" target="_blank"><span class="icon">🏢</span>組織図</a>
+      <a class="quick-btn" onclick="showPage('fukuri')"><span class="icon">🎁</span>福利厚生</a>
+    </div>
+  </div>
+
+  <!-- 新着情報 & 今後のイベント -->
+  <div class="section" style="padding-top:0">
+    <div class="two-col">
+      <div>
+        <div class="section-title">新着情報</div>
+        <ul class="news-list">
+          <li onclick="showPage('oshirase')"><span class="date">2026.04.01</span><span class="badge">全体</span>ポータルサイトを公開しました</li>
+          <li onclick="showPage('kitei')"><span class="date">2026.04.01</span><span class="badge">総務</span>規程類集の管理について</li>
+          <li onclick="showPage('soshiki')"><span class="date">2026.04.01</span><span class="badge">総務</span>内線番号表を更新しました</li>
+          <li onclick="showPage('oshirase')"><span class="date">2026.03.31</span><span class="badge blue">人事</span>令和8年4月 人事異動のお知らせ</li>
+          <li onclick="showPage('fukuri')"><span class="date">2026.03.31</span><span class="badge orange">厚生</span>就学等支援及び奨学金貸与に関する規程の改正</li>
+          <li onclick="showPage('fukuri')"><span class="date">2026.03.31</span><span class="badge orange">厚生</span>慶弔見舞金及び特別休暇に関する規程の制定</li>
+          <li onclick="showPage('kitei')"><span class="date">2026.03.31</span><span class="badge orange">厚生</span>コンプライアンスホットラインの運用変更</li>
+        </ul>
+        <a onclick="showPage('oshirase')" style="font-size:13px;color:var(--green);cursor:pointer;display:block;margin-top:10px;">すべて表示 →</a>
+      </div>
+      <div>
+        <div class="section-title">今後のイベント</div>
+        <ul class="event-list">
+          <li><span class="event-date">4月 8日</span>令和8年度 入職式・新入職員研修</li>
+          <li><span class="event-date">4月10日</span>グループ管理職会議</li>
+          <li><span class="event-date">4月15日</span>感染症対策研修（旭川）</li>
+          <li><span class="event-date">4月22日</span>バクラク操作説明会（オンライン）</li>
+          <li><span class="event-date">5月 1日</span>コンプライアンス研修（全拠点）</li>
+        </ul>
+        <p style="font-size:12px;color:var(--text-sub);margin-top:10px;">※ 詳細は研修・教育ページのカレンダーを確認してください</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 部署別ページ -->
+  <div class="section" style="padding-top:0">
+    <div class="section-title">部署別ページ</div>
+    <div class="card-grid">
+      <div class="card"><div class="icon">📊</div><div class="name">経営企画部</div></div>
+      <div class="card"><div class="icon">👥</div><div class="name">人材開発部</div></div>
+      <div class="card"><div class="icon">🏥</div><div class="name">医療事業部</div></div>
+      <div class="card"><div class="icon">🏠</div><div class="name">介護事業部<br>（旭川）</div></div>
+      <div class="card"><div class="icon">🏠</div><div class="name">介護事業部<br>（札幌・江別）</div></div>
+      <div class="card"><div class="icon">🏠</div><div class="name">介護事業部<br>（苫小牧）</div></div>
+      <div class="card"><div class="icon">🏠</div><div class="name">介護事業部<br>（東京）</div></div>
+      <div class="card"><div class="icon">💰</div><div class="name">財務部</div></div>
+      <div class="card"><div class="icon">🔧</div><div class="name">総務部</div></div>
+      <div class="card"><div class="icon">🚀</div><div class="name">新規事業<br>開発室</div></div>
+    </div>
+  </div>
+
+  <!-- 業務ツール -->
+  <div class="section" style="padding-top:0">
+    <div class="section-title">業務ツール</div>
+    <div class="tool-grid">
+      <a class="tool-btn" href="https://mail.google.com/" target="_blank"><span class="icon">✉️</span>Gmail</a>
+      <a class="tool-btn" href="https://calendar.google.com/" target="_blank"><span class="icon">📅</span>カレンダー</a>
+      <a class="tool-btn" href="https://drive.google.com/" target="_blank"><span class="icon">💾</span>ドライブ</a>
+      <a class="tool-btn" href="https://chat.google.com/" target="_blank"><span class="icon">💬</span>Chat</a>
+      <a class="tool-btn" href="https://meet.google.com/" target="_blank"><span class="icon">📹</span>Meet</a>
+      <a class="tool-btn" href="https://app.bakuraku.jp/" target="_blank"><span class="icon">📋</span>バクラク申請</a>
+      <a class="tool-btn" href="https://app.bakuraku.jp/" target="_blank"><span class="icon">💴</span>バクラク経費</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ お知らせ・通知 ═══════════════════════════ -->
+<div id="page-oshirase" class="page">
+  <div class="page-hero">
+    <h1>📢 お知らせ・通知</h1>
+    <p>グループ全体および各部署からの通知・お知らせを掲載しています。</p>
+  </div>
+  <div class="section">
+    <div class="content-block">
+      <h2>グループ全体のお知らせ</h2>
+      <ul class="news-list" style="margin-top:0">
+        <li onclick="showPage('oshirase')"><span class="date">2026.04.01</span><span class="badge">全体</span>ポータルサイトを公開しました</li>
+        <li onclick="showPage('kitei')"><span class="date">2026.04.01</span><span class="badge">総務</span>規程類集の管理について</li>
+        <li onclick="showPage('soshiki')"><span class="date">2026.04.01</span><span class="badge">総務</span>内線番号表を更新しました</li>
+        <li onclick="showPage('oshirase')"><span class="date">2026.03.31</span><span class="badge blue">人事</span>令和8年4月 人事異動のお知らせ</li>
+        <li onclick="showPage('fukuri')"><span class="date">2026.03.31</span><span class="badge orange">厚生</span>就学等支援及び奨学金貸与に関する規程の一部改正について</li>
+        <li onclick="showPage('fukuri')"><span class="date">2026.03.31</span><span class="badge orange">厚生</span>慶弔見舞金及び特別休暇に関する規程の制定について</li>
+        <li onclick="showPage('kitei')"><span class="date">2026.03.31</span><span class="badge orange">厚生</span>コンプライアンスホットラインの運用変更について</li>
+        <li onclick="showPage('oshirase')"><span class="date">2026.03.30</span><span class="badge orange">厚生</span>厚生課まとめサイトを公開しました</li>
+      </ul>
+    </div>
+    <div class="content-block">
+      <h2>カテゴリ別リンク</h2>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:4px">
+        <a class="quick-btn" style="padding:10px 18px;font-size:13px;min-width:120px;text-align:center" href="#">総務・法務通知</a>
+        <a class="quick-btn" style="padding:10px 18px;font-size:13px;min-width:120px;text-align:center" href="#">労務通知</a>
+        <a class="quick-btn" style="padding:10px 18px;font-size:13px;min-width:120px;text-align:center" href="#">人事異動</a>
+        <a class="quick-btn" style="padding:10px 18px;font-size:13px;min-width:120px;text-align:center;background:#888" href="#">アーカイブ</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ 社内手続き・申請ガイド ═══════════════════════════ -->
+<div id="page-tetsuzuki" class="page">
+  <div class="page-hero">
+    <h1>📝 社内手続き・申請ガイド</h1>
+    <p>各種申請の手順・提出先をまとめています。「何を申請すればよいか」はこのページで確認してください。</p>
+  </div>
+  <div class="section">
+    <div class="content-block">
+      <h2>申請フロー一覧</h2>
+      <table class="flow-table">
+        <thead><tr><th>カテゴリ</th><th>申請名</th><th>申請先</th><th>承認フロー</th></tr></thead>
+        <tbody>
+          <tr><td class="cat" rowspan="3">勤怠</td><td>有給休暇申請</td><td>バクラク申請</td><td>申請者 → 所属長 → 人事</td></tr>
+          <tr><td>特別休暇申請</td><td>バクラク申請</td><td>申請者 → 所属長 → 人事</td></tr>
+          <tr><td>時間外勤務申請</td><td>バクラク申請</td><td>申請者 → 所属長</td></tr>
+          <tr><td class="cat" rowspan="2">出張</td><td>出張申請（事前）</td><td>バクラク申請</td><td>申請者 → 所属長 → 経営企画</td></tr>
+          <tr><td>出張精算（事後）</td><td>バクラク経費精算</td><td>申請者 → 所属長 → 財務</td></tr>
+          <tr><td class="cat" rowspan="2">経費</td><td>交通費精算</td><td>バクラク経費精算</td><td>申請者 → 所属長 → 財務</td></tr>
+          <tr><td>立替経費精算</td><td>バクラク経費精算</td><td>申請者 → 所属長 → 財務</td></tr>
+          <tr><td class="cat" rowspan="2">購買・備品</td><td>備品購入申請</td><td>バクラク申請</td><td>申請者 → 所属長 → 総務</td></tr>
+          <tr><td>ユニフォーム注文</td><td>Google フォーム</td><td>各事業所 → 総務</td></tr>
+          <tr><td class="cat" rowspan="2">稟議</td><td>一般稟議</td><td>バクラク申請</td><td>申請者 → 所属長 → 部門長 → 経営企画</td></tr>
+          <tr><td>契約稟議</td><td>バクラク申請</td><td>申請者 → 所属長 → 法務 → 経営企画</td></tr>
+          <tr><td class="cat" rowspan="2">人事届出</td><td>住所変更届</td><td>バクラク申請 / Gフォーム</td><td>申請者 → 人事</td></tr>
+          <tr><td>扶養異動届</td><td>バクラク申請 / Gフォーム</td><td>申請者 → 人事</td></tr>
+          <tr><td class="cat" rowspan="2">IT関連</td><td>アカウント作成・変更</td><td>Google フォーム</td><td>申請者 → 所属長 → 情シス</td></tr>
+          <tr><td>システム障害報告</td><td>Google フォーム</td><td>報告者 → 情シス</td></tr>
+          <tr><td class="cat">施設管理</td><td>施設修繕依頼</td><td>Google フォーム</td><td>依頼者 → 管財 → 総務</td></tr>
+          <tr><td class="cat">規程</td><td>規程類集ファイル申請</td><td>Google フォーム</td><td>申請者 → 総務・法務課</td></tr>
+          <tr><td class="cat">福利厚生</td><td>慶弔見舞金申請</td><td>バクラク申請 / Gフォーム</td><td>申請者 → 所属長 → 総務</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="content-block">
+      <h2>バクラクの使い方</h2>
+      <ol style="padding-left:20px;font-size:14px;line-height:2">
+        <li>バクラクにログイン（下のボタンからアクセス）</li>
+        <li>「新規申請」をクリック</li>
+        <li>申請テンプレートを選択（休暇、出張、経費 等）</li>
+        <li>必要事項を入力し、添付ファイルがあれば追加</li>
+        <li>「申請」ボタンをクリック</li>
+        <li>承認状況はバクラクのダッシュボードで確認できます</li>
+      </ol>
+      <div style="margin-top:16px">
+        <a class="quick-btn" href="https://workflow.layerx.jp/forms" target="_blank" style="display:inline-block;padding:12px 28px;font-size:14px">バクラク申請・経費精算を開く</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ 規程・マニュアル ═══════════════════════════ -->
+<div id="page-kitei" class="page">
+  <div class="page-hero">
+    <h1>📖 規程・マニュアル</h1>
+    <p>グループの規程類集・業務マニュアルを掲載しています。</p>
+  </div>
+  <div class="section">
+    <div class="content-block">
+      <h2>規程類集</h2>
+      <p>規程類集はスプレッドシートで管理しています。部署名をクリックすると該当する規程一覧が表示されます。</p>
+      <p style="margin-top:12px;padding:14px;background:var(--green-light);border-radius:8px;font-size:13px;">
+        📎 規程類集スプレッドシートはGoogleドライブに格納されています。<br>
+        アクセスには <strong>@kenkohkai.jp</strong> アカウントでのログインが必要です。
+      </p>
+    </div>
+    <div class="content-block">
+      <h2>規程類集ファイル申請フォーム</h2>
+      <p>規程ファイルの閲覧・取得が必要な場合は、以下のフォームから申請してください。</p>
+      <p style="margin-top:8px;font-size:13px;color:var(--text-sub);">所管部署：総務・法務課</p>
+      <div style="margin-top:14px">
+        <a class="quick-btn" style="display:inline-block;padding:12px 28px;font-size:14px" href="#">規程類集ファイル申請フォームを開く</a>
+      </div>
+    </div>
+    <div class="content-block">
+      <h2>コンプライアンス関連</h2>
+      <p><strong>コンプライアンスホットライン</strong></p>
+      <p style="margin-top:8px;font-size:14px;line-height:1.75">内部通報制度に関する窓口です。匿名での通報も可能です。<br>
+      運用方法の詳細は厚生課通知「コンプライアンスホットラインの運用変更について」（2026.03.31付）をご確認ください。</p>
+      <p style="margin-top:10px;font-size:13px;color:var(--text-sub);">連絡先：総務・法務課（詳細は内線番号表を参照）</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ 組織情報 ═══════════════════════════ -->
+<div id="page-soshiki" class="page">
+  <div class="page-hero">
+    <h1>🏢 組織情報</h1>
+    <p>くにもとメディカルグループの理念・組織構成・連絡先情報をまとめています。</p>
+  </div>
+  <div class="section">
+    <div class="content-block">
+      <h2>グループ理念</h2>
+      <p style="font-size:18px;font-weight:700;color:var(--green-dark);margin-bottom:12px;">ミッション：「ここで生きる、をかなえる」</p>
+      <p>くにもとメディカルグループは、医療法人5法人・株式会社8法人の計13法人で構成される統合型ヘルスケアネットワークです。<br>
+      急性期病院から訪問診療・介護施設・障害支援まで、ほぼ全種別のサービスを自グループ内で提供し、北海道の地域医療・介護を支えています。</p>
+      <ul style="margin-top:12px">
+        <li>拠点：旭川・札幌・江別・苫小牧・室蘭・東神楽・東京</li>
+        <li>施設数：50以上</li>
+        <li>グループ公式サイト：<a href="https://kenkohkai.jp/group/" target="_blank" style="color:var(--green)">https://kenkohkai.jp/group/</a></li>
+      </ul>
+    </div>
+    <div class="content-block">
+      <h2>組織図（令和8年4月現在）</h2>
+      <p style="margin-bottom:14px;">法人構成図・本部組織図はGoogleドライブに格納されています。</p>
+      <div style="background:var(--green-light);border-radius:8px;padding:16px;font-size:13px">
+        <strong>室・本部の構成（令和8年4月）主要ポスト</strong><br><br>
+        <table style="width:100%;font-size:12px;border-collapse:collapse">
+          <tr style="background:var(--green);color:#fff"><th style="padding:6px 10px;text-align:left">部門</th><th style="padding:6px 10px;text-align:left">主な担当者</th></tr>
+          <tr><td style="padding:5px 10px;border-bottom:1px solid var(--border)">経営企画部</td><td style="padding:5px 10px;border-bottom:1px solid var(--border)">経営企画課、地域連携営業課、経営支援課</td></tr>
+          <tr><td style="padding:5px 10px;border-bottom:1px solid var(--border)">人材開発部</td><td style="padding:5px 10px;border-bottom:1px solid var(--border)">労務課、人材開発課、採用課</td></tr>
+          <tr><td style="padding:5px 10px;border-bottom:1px solid var(--border)">医療事業部</td><td style="padding:5px 10px;border-bottom:1px solid var(--border)">くにもと病院、忠和CL、おおあさCL、北14条CL、富丘まごころ内科CL、丘珠空港前歯科CL</td></tr>
+          <tr><td style="padding:5px 10px;border-bottom:1px solid var(--border)">介護事業部</td><td style="padding:5px 10px;border-bottom:1px solid var(--border)">旭川・札幌・江別・苫小牧・東京 各事業課</td></tr>
+          <tr><td style="padding:5px 10px;border-bottom:1px solid var(--border)">財務部</td><td style="padding:5px 10px;border-bottom:1px solid var(--border)">財務経理課</td></tr>
+          <tr><td style="padding:5px 10px">総務部</td><td style="padding:5px 10px">総務・法務課、インフラ管理課、秘書課</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="content-block">
+      <h2>グループ名簿・内線番号表</h2>
+      <p style="margin-bottom:14px;">グループ名簿・内線番号表（財務経理課の法人担当名・管理者名入り）はGoogleドライブに格納されています。</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <a class="quick-btn" style="padding:10px 20px;font-size:13px" href="https://docs.google.com/spreadsheets/d/1c0RGI76bfhHgJ0VqvbqHB_WOakrdB5Lw/edit" target="_blank">グループ名簿を開く</a>
+        <a class="quick-btn" style="padding:10px 20px;font-size:13px" href="https://docs.google.com/spreadsheets/d/1EO-krX-JsmXw2F86XFyAxmRJT70pwCvV/edit" target="_blank">内線番号表を開く</a>
+        <a class="quick-btn" style="padding:10px 20px;font-size:13px" href="https://drive.google.com/file/d/157FDzxPBbDTaBs0gwC1G8XEsvM1PCMGr/view" target="_blank">組織図を開く</a>
+      </div>
+    </div>
+    <div class="content-block">
+      <h2>施設一覧</h2>
+      <div class="two-col" style="font-size:13px;line-height:1.9">
+        <div>
+          <strong>■ 病院</strong><br>くにもと病院（旭川市曙1条7丁目）<br><br>
+          <strong>■ 訪問診療クリニック</strong><br>忠和クリニック / おおあさクリニック<br><br>
+          <strong>■ 内科・内視鏡クリニック</strong><br>札幌北14条クリニック / 富丘まごころ内科CL<br><br>
+          <strong>■ 歯科</strong><br>丘珠空港前歯科
+        </div>
+        <div>
+          <strong>■ 介護施設</strong><br>グループホーム、メディケアホーム、老健おおぞら、カルナシア 等<br><br>
+          <strong>■ 在宅サービス</strong><br>訪問看護、訪問介護、デイサービス、居宅介護支援、福祉用具<br><br>
+          <strong>■ 障害支援</strong><br>障害支援事業所<br><br>
+          <strong>■ バックオフィス法人</strong><br>インターメディックス、KMS、MCM 等
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ 研修・教育 ═══════════════════════════ -->
+<div id="page-kenshu" class="page">
+  <div class="page-hero">
+    <h1>🎓 研修・教育</h1>
+    <p>グループ全体の研修スケジュール・教育リソースをまとめています。</p>
+  </div>
+  <div class="section">
+    <div class="content-block">
+      <h2>研修カレンダー</h2>
+      <p style="margin-bottom:14px;">グループ共有の研修カレンダーはGoogleカレンダーで管理しています。</p>
+      <ul class="event-list">
+        <li><span class="event-date">4月 8日</span>令和8年度 新入職員研修（全拠点合同・旭川会場）</li>
+        <li><span class="event-date">4月15日</span>感染症対策研修（旭川ブロック）</li>
+        <li><span class="event-date">4月22日</span>バクラク申請操作説明会（オンライン・全員対象）</li>
+        <li><span class="event-date">5月 1日</span>コンプライアンス研修（全拠点）</li>
+        <li><span class="event-date">5月15日</span>介護技術研修（札幌ブロック）</li>
+        <li><span class="event-date">6月初旬</span>管理職研修（日程調整中）</li>
+      </ul>
+    </div>
+    <div class="content-block">
+      <h2>研修資料アーカイブ</h2>
+      <p>過去の研修資料はGoogleドライブの共有フォルダに格納しています。</p>
+      <div style="margin-top:14px">
+        <a class="quick-btn" style="display:inline-block;padding:12px 28px;font-size:14px" href="https://drive.google.com/" target="_blank">研修資料フォルダを開く</a>
+      </div>
+    </div>
+    <div class="content-block">
+      <h2>資格取得支援</h2>
+      <p>グループでは職員の資格取得を支援しています。</p>
+      <ul style="margin-top:10px">
+        <li>対象資格・補助制度の詳細は「就学等支援及び奨学金貸与に関する規程」をご確認ください</li>
+        <li>申請方法：バクラク申請 または 人材開発部へ直接お問い合わせください</li>
+        <li>お問い合わせ先：人材開発部</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ 新入職員ガイド ═══════════════════════════ -->
+<div id="page-onboarding" class="page">
+  <div class="page-hero">
+    <h1>🌱 新入職員ガイド</h1>
+    <p>くにもとメディカルグループへようこそ！入職初日からスムーズに業務を始められるよう、必要な情報をまとめています。</p>
+  </div>
+  <div class="section">
+    <div class="content-block">
+      <h2>入職手続きチェックリスト</h2>
+      <ul class="checklist">
+        <li>雇用契約書の提出</li>
+        <li>身元保証書の提出</li>
+        <li>給与振込先届の提出</li>
+        <li>マイナンバー届出</li>
+        <li>健康診断書の提出</li>
+        <li>資格証の写し提出（該当職種のみ）</li>
+        <li>Google Workspaceアカウントの受取とログイン確認</li>
+        <li>バクラクへの初回ログイン</li>
+        <li>勤怠管理システムへの初回打刻</li>
+        <li>内線番号の確認</li>
+        <li>配属先への挨拶</li>
+      </ul>
+    </div>
+    <div class="content-block">
+      <h2>Google Workspaceの使い方</h2>
+      <p style="margin-bottom:12px;">入職時にお渡しする <strong>@kenkohkai.jp</strong> アカウントで以下のサービスが利用できます。</p>
+      <div class="tool-grid">
+        <a class="tool-btn" href="https://mail.google.com/" target="_blank"><span class="icon">✉️</span>Gmail</a>
+        <a class="tool-btn" href="https://calendar.google.com/" target="_blank"><span class="icon">📅</span>カレンダー</a>
+        <a class="tool-btn" href="https://drive.google.com/" target="_blank"><span class="icon">💾</span>ドライブ</a>
+        <a class="tool-btn" href="https://chat.google.com/" target="_blank"><span class="icon">💬</span>Chat</a>
+        <a class="tool-btn" href="https://meet.google.com/" target="_blank"><span class="icon">📹</span>Meet</a>
+      </div>
+      <p style="margin-top:12px;font-size:13px;color:var(--text-sub);">⚠️ 患者情報・個人情報は所定のセキュアな環境でのみ取り扱ってください。</p>
+    </div>
+    <div class="content-block">
+      <h2>バクラクの使い方</h2>
+      <p>バクラクは各種申請（休暇・経費精算・稟議など）を行うシステムです。</p>
+      <ol style="margin-top:10px">
+        <li>下のボタンをクリック（または <a href="https://app.bakuraku.jp/" target="_blank" style="color:var(--green)">https://app.bakuraku.jp/</a> にアクセス）</li>
+        <li>Googleアカウント（@kenkohkai.jp）でログイン</li>
+        <li>「新規申請」から申請テンプレートを選択</li>
+      </ol>
+      <div style="margin-top:14px">
+        <a class="quick-btn" style="display:inline-block;padding:12px 28px;font-size:14px" href="https://workflow.layerx.jp/forms" target="_blank">バクラクにログイン</a>
+      </div>
+    </div>
+    <div class="content-block">
+      <h2>よくある質問（FAQ）</h2>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">パスワードを忘れた場合は？</div>
+        <div class="faq-a">Googleアカウントのパスワードリセットは情シスへご連絡ください。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">有給休暇の残日数を確認したいのですが？</div>
+        <div class="faq-a">バクラク申請にログインし、ダッシュボードで確認できます。不明な場合は人事へお問い合わせください。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">社用メールをスマートフォンで確認できますか？</div>
+        <div class="faq-a">はい。Gmailアプリをインストールし、@kenkohkai.jpアカウントでログインしてください。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">備品を購入したいのですが？</div>
+        <div class="faq-a">バクラク申請で「備品購入申請」テンプレートを使用してください。所属長の承認後、総務部が手配します。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">困ったときの問い合わせ先は？</div>
+        <div class="faq-a">
+          IT関連（アカウント、システム）→ 情シス<br>
+          人事関連（給与、休暇、異動）→ 人材開発部<br>
+          総務関連（施設、備品、車両）→ 総務部<br>
+          経費関連（精算、立替）→ 財務部
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ 業務ツール・リンク集 ═══════════════════════════ -->
+<div id="page-tools" class="page">
+  <div class="page-hero">
+    <h1>🔗 業務ツール・リンク集</h1>
+    <p>業務で使用するシステム・ツールへのリンク集です。</p>
+  </div>
+  <div class="section">
+    <div class="content-block">
+      <h2>Google Workspace</h2>
+      <div class="tool-grid">
+        <a class="tool-btn" href="https://mail.google.com/" target="_blank"><span class="icon">✉️</span>Gmail</a>
+        <a class="tool-btn" href="https://calendar.google.com/" target="_blank"><span class="icon">📅</span>カレンダー</a>
+        <a class="tool-btn" href="https://drive.google.com/" target="_blank"><span class="icon">💾</span>ドライブ</a>
+        <a class="tool-btn" href="https://chat.google.com/" target="_blank"><span class="icon">💬</span>Chat</a>
+        <a class="tool-btn" href="https://meet.google.com/" target="_blank"><span class="icon">📹</span>Meet</a>
+        <a class="tool-btn" href="https://sheets.google.com/" target="_blank"><span class="icon">📊</span>スプレッドシート</a>
+        <a class="tool-btn" href="https://docs.google.com/" target="_blank"><span class="icon">📄</span>ドキュメント</a>
+        <a class="tool-btn" href="https://slides.google.com/" target="_blank"><span class="icon">🖼️</span>スライド</a>
+        <a class="tool-btn" href="https://forms.google.com/" target="_blank"><span class="icon">📋</span>フォーム</a>
+      </div>
+    </div>
+    <div class="content-block">
+      <h2>申請・経費システム</h2>
+      <div class="tool-grid">
+        <a class="tool-btn" href="https://workflow.layerx.jp/forms" target="_blank"><span class="icon">📋</span>バクラク申請</a>
+        <a class="tool-btn" href="https://workflow.layerx.jp/forms" target="_blank"><span class="icon">💴</span>バクラク経費精算</a>
+      </div>
+      <p style="margin-top:10px;font-size:13px;color:var(--text-sub)">※ 実際のログインURLは財務部または管理者に確認してください。</p>
+    </div>
+    <div class="content-block">
+      <h2>医療・介護システム</h2>
+      <p style="margin-bottom:12px">以下のシステムは各施設の端末からアクセスしてください。リモートアクセスが必要な場合は情シスにご相談ください。</p>
+      <ul>
+        <li>電子カルテ（施設別にURLが異なります）</li>
+        <li>介護記録システム</li>
+        <li>医事会計システム</li>
+        <li>PACS（画像管理システム）</li>
+      </ul>
+    </div>
+    <div class="content-block">
+      <h2>その他の業務システム</h2>
+      <div class="tool-grid">
+        <a class="tool-btn" href="https://follow.jp/cw/login" target="_blank"><span class="icon">⏰</span>勤怠管理</a>
+        <a class="tool-btn" href="https://app.smarthr.jp/login" target="_blank"><span class="icon">💰</span>給与明細</a>
+        <a class="tool-btn" href="https://www.reloclub.jp/" target="_blank"><span class="icon">🎁</span>福利厚生倶楽部</a>
+      </div>
+      <p style="margin-top:10px;font-size:13px;color:var(--text-sub)">※ URLは総務部または人材開発部に確認してください。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ 福利厚生・職員サポート ═══════════════════════════ -->
+<div id="page-fukuri" class="page">
+  <div class="page-hero">
+    <h1>🎁 福利厚生・職員サポート</h1>
+    <p>グループの福利厚生制度・職員サポートをご案内します。</p>
+  </div>
+  <div class="section">
+    <div class="content-block">
+      <h2>福利厚生倶楽部</h2>
+      <p>2025年12月より「福利厚生倶楽部」を導入しています。宿泊・レジャー・ショッピング・育児・介護など、さまざまなサービスを会員価格で利用できます。</p>
+      <p style="margin-top:10px;padding:12px;background:var(--green-light);border-radius:8px;font-size:13px">
+        📹 利用方法やサービス内容は説明動画をご覧ください（YouTubeリンクは総務部より案内）
+      </p>
+    </div>
+    <div class="content-block">
+      <h2>職員割引・提携施設</h2>
+      <p><strong>北海道ホテル＆リゾート 入館料割引</strong></p>
+      <p style="margin-top:8px">グループ職員は以下の提携施設を割引料金で利用できます。詳細はポスター（総務部より配布）をご確認ください。</p>
+    </div>
+    <div class="content-block">
+      <h2>慶弔見舞金・特別休暇</h2>
+      <p>結婚・出産・弔事等の際に、慶弔見舞金の支給および特別休暇の取得が可能です。</p>
+      <ul style="margin-top:10px">
+        <li>詳細は「慶弔見舞金及び特別休暇に関する規程」をご確認ください（規程・マニュアルページからアクセス）</li>
+        <li>申請方法：バクラク申請 または Google フォームで申請してください</li>
+      </ul>
+    </div>
+    <div class="content-block">
+      <h2>奨学金・資格取得支援</h2>
+      <ul>
+        <li><strong>就学等支援及び奨学金貸与制度</strong>：対象はグループ職員（条件あり）</li>
+        <li>詳細は「就学等支援及び奨学金貸与に関する規程」をご確認ください</li>
+        <li>申請方法：人材開発部にお問い合わせください</li>
+      </ul>
+    </div>
+    <div class="content-block">
+      <h2>相談窓口</h2>
+      <ul style="line-height:2">
+        <li>🔒 <strong>コンプライアンスホットライン</strong>：法令違反やハラスメント等の通報・相談窓口（匿名可）→ 総務・法務課</li>
+        <li>💚 <strong>メンタルヘルス相談</strong>：業務上のストレスや心身の不調について相談できます → 人材開発部</li>
+        <li>👤 <strong>人事関連</strong> → 人材開発部</li>
+        <li>💴 <strong>給与関連</strong> → 財務部</li>
+        <li>🏢 <strong>施設関連</strong> → 総務部</li>
+        <li>🖥️ <strong>IT関連</strong> → 情シス</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- フッター -->
+<footer>
+  <p>くにもとメディカルグループ ポータルサイト　©2026 Kunimoto Medical Group</p>
+  <p style="margin-top:4px;opacity:.7">このサイトはグループ職員専用です。閲覧権限：組織内ユーザー限定</p>
+</footer>
+
+<script>
+  function showPage(id) {
+    // ページ切替
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    // ナビアクティブ
+    document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+    const navEl = document.getElementById('nav-' + id);
+    if (navEl) navEl.classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function toggleFaq(el) {
+    el.parentElement.classList.toggle('open');
+  }
+</script>
+</body>
+</html>
